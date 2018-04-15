@@ -1,0 +1,33 @@
+//Quicksort，only body.
+
+
+//use int as a simple
+
+void quick_sort( ){
+    int size=arrays.size();
+    if(size<2) return ;
+    int pivot = size/2;
+    swap(arrays[0],arrays[pivot])            ///swap(a,b) is a exchange arrays function has two parameter express two index,and
+                                             /// exchange arrays[a] and arrays[b]
+    quick_sort_body(0,size);
+}
+
+void quick_sort_body(int begin,int end){
+  if(begin<=end)  
+    return;
+  
+  int index = begin;
+  int pivot = arrays[begin];
+  
+  for(int i = begin; i<end; i++)
+    if(arrays[i]<=privot){
+      index++;
+      swap(i,index);
+    }
+  
+  swap(begin,index);
+  quick_sort_body(begin,index);
+  quick_sort_body(++index,end);
+  
+
+}
