@@ -1,0 +1,12 @@
+
+
+//default arrays[],function arrays.length, ascending order
+
+public bubble_sort(){
+  int length=arrays.length-1;
+  for(int i=0;i<length;i++)
+    for(int j=0;i<length-i;j++){
+      if(arrays[j]>arrays[j+1])
+        swap(j,j+1);
+    }
+}
