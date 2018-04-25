@@ -9,6 +9,7 @@
 
 
 //上代码，假设这个对象拿到了乱序即我们要进行排序的数据，且这个数据是int型的，这个数组为arrays,我们进行升序的排序
+
 public static void insertion_sort（）{
   int length = arrays.length;
   for(int i = 1; i < length; i++)
@@ -16,8 +17,18 @@ public static void insertion_sort（）{
       int temp = arrays[i];
       for(int j = i-1 ; j >= 0 && temp < arrays[j]  ;j--)
         arrays[j+1] = arrays[j];
+        
+        arrays[j+1]=temp;
     }
+    
 }
 
-//看完代码相信你会发现，一开始的思路大体是正确的，但细节上或许处理的不是太好，我们并不需要一开始就找到精确的位置，我们只需要知道所找的位置在上面之前
-//足够了，变寻找，变腾地方，即覆盖arrays[j+1],我们只需要存储好我们将要插入的数据
+//看完代码相信你会发现，一开始的思路大体是正确的，但细节上或许处理的不是太好，我们并不需要一开始就找到精确的位置，我们只需要知道所找的位置在某个位置之前
+//就足够了，边往前寻找，边腾地方，即覆盖arrays[j+1],我们只需要存储好我们将要插入的数据(temp=arrays[i]),那么我们始终会有多余的一个位置用于往后移动
+
+
+
+
+
+
+
