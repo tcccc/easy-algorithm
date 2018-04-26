@@ -40,8 +40,17 @@ public static void shallSort(int t){
 //优化代码
 
 public static void shallSort(int t){
-
-
+  int n = arrays.length;
+  int j;
+  for(int h=n/t; h > 0; h/=t)
+    for(int i = h; i < n; i++)
+      if(arrays[i-h]>arrays[i]){
+        int temp = arrays[i];
+        for(j=i-h; j>=0 && temp<arrays[j]; j-=h)
+          arrays[i+h]=arrays[i];
+        arrays[j+h]=temp;
+      }
+}
 
 
 
