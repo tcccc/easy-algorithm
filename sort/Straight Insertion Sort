@@ -12,10 +12,11 @@
 
 public static void insertion_sort（）{
   int length = arrays.length;
-  for(int i = 1; i < length; i++)
+  int i,j;
+  for(i = 1; i < length; i++)
     if(arrays[i]<arrays[i-1]){
       int temp = arrays[i];
-      for(int j = i-1 ; j >= 0 && temp < arrays[j]  ;j--)
+      for(j = i-1 ; j >= 0 && temp < arrays[j]  ;j--)
         arrays[j+1] = arrays[j];
         
         arrays[j+1]=temp;
