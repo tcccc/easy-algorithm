@@ -1,0 +1,26 @@
+
+
+
+
+//直接选择排序，原理很简单，升序排列时，第一次找出 n个元素的最小索引minIndex，交换arrays[0]跟arrays[minIndex]的内容
+//第二次找出n-1个元素中最小索引minIndex，交换arrays[1],arrays[minIndex]
+//  n-i,  arrays[i],arrays[minIndex]
+
+
+public static void StraightSelect_sort(int[] arrays){
+  int n = arrays.length;
+  for(int i =0; i < n-1; i++){
+    int minIndex = i;
+    
+    for(int j = i+1; j < n;j++)
+      if(arrays[minIndex]>arrays[j])
+        minIndex = j;
+        
+    if(i!=minIndex){
+      int temp = arrays[i];
+      arrays[i] = arrays[minIndex];
+      arrays[minIndex] = temp;
+    }
+    
+  }
+}
