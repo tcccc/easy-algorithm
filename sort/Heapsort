@@ -1,0 +1,40 @@
+
+
+//堆排序
+//堆排序算法，首先要建立一个堆，也就是一个完全二叉树，其父节点一定大于子节点，之后就是取堆顶的操作
+//
+//时间复杂度
+//创建堆的时间复杂度是O(n), 首先想象一个含有n个节点的二叉树，如何才能变成我们所需要的二叉堆
+//n个节点的二叉树，高度h=log2n+1（去尾），我们考虑一个满二叉树，从倒数第二层（第一层只有一个节点）开始，约有1/2的元素向下比较一次，上去一层，约有1/4的
+//元素向下比较2次，最后我们可以推出时间复杂度为 n-log2n-1，O(n)
+//再考虑去堆顶的操作，每次操作为log2n，共操作n-1次，时间复杂度为 (n-1)log2n=nlog2n-log2n
+//总的时间复杂度约为 nlog2n
+
+//默认这个类已经拿到一个乱序的数组在维护，arrays
+public static void heap_begain(){
+  for(int startIndex = (arrays.length-1)/2;i>=0;i--)
+    heap_sort(startIndex,arrays.length);                                  
+  for(int i=arrays.length-1; i> 0; i--){                                //这时我们已经创建好了堆
+    int temp = arrays[i];
+    arrays[i]= arrays[0];
+    arrays[0]= temp;
+    heap_sort(0,i);
+  }  
+}
+
+
+public static void heap_sort(int parentNode,int n){
+  int childNode = parentNode*2+1;
+  int temp= arrays[parentNode];
+  while(childNode <n){
+    if(arrays[childNode+1]>arrays[childNode] && childNode+1 <n)
+      childNode++;
+    if(arrays[childNode]< temp)
+      break;
+    arrays[parentNode]= arrays[childNode];
+    parentNode= childNode;
+    chiledNode= parentNode*2+1;
+  }
+  arrays[parentNode]=temp;
+  
+}
