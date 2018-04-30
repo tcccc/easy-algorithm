@@ -12,7 +12,7 @@
 
 //默认这个类已经拿到一个乱序的数组在维护，arrays
 public static void heap_begain(){
-  for(int startIndex = (arrays.length-1)/2;i>=0;i--)
+  for(int startIndex = (arrays.length-1)/2; startIndex >=0; startIndex--)
     heap_sort(startIndex,arrays.length);                                  
   for(int i=arrays.length-1; i> 0; i--){                                //这时我们已经创建好了堆
     int temp = arrays[i];
