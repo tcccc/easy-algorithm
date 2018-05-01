@@ -27,9 +27,9 @@ public static void heap_sort(int parentNode,int n){
   int childNode = parentNode*2+1;
   int temp= arrays[parentNode];
   while(childNode <n){
-    if(arrays[childNode+1]>arrays[childNode] && childNode+1 <n)
-      childNode++;
-    if(arrays[childNode]< temp)
+    if(childNode+1 <n && arrays[childNode+1]>arrays[childNode])   //这里有个小细节本人运行时才发现,chileNode+1 <n的判定条件
+    if(arrays[childNode]< temp)                //必须放在前边，否则有可能越界outofbounds，&& 运算符判定前一个条件为0，则后边条件不会运行
+      
       break;
     arrays[parentNode]= arrays[childNode];
     parentNode= childNode;
