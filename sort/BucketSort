@@ -1,0 +1,58 @@
+
+
+//桶排序
+
+//原理很简单，看一下桶的存储模型图，很好理解
+
+//局限性很大
+
+//我们用对数字类型元素排序来举例子
+
+//假设这个序列中最大的数的位数为 MAXDigit ，这个序列是 arrays
+
+//我们可以知道每位的数字只能是0~9，所以我们可以根据其中一位的数字，讲序列分成10个序列
+
+//我们从个位开始分，分成10个序列了，这其中可能某个子序列为空，也可能有多个元素，用一个order[10] ,来存储每个子序列所含元素的个数
+
+//然后将10个子序列，从0~9，按先后顺序依次放回原序列
+
+//重复前面几步，将比较位数*10，很好理解，当比较位数达到MAXDigit，结束后，原序列即为有序的了
+
+//桶排序的局限性很显然了，你需要根据关键字，分割成多个桶，还要根据关键字可能存在的数量，开辟（MAXDight+1）*10的空间，+1是因为还要记录各个桶内元素个数
+
+
+//最低为有限LSD
+//我们写一个对int类型数组排序的桶排序，桶排序给了我们一个思路，关键字的拆分，数字存在10种情况，但可能有些数据存在的情况很少，这就很舒服了
+//对MAXDight说明一下，代表此序列最大数的位数，你可以再此方法进行之前计算出MAXDight再调用这个方法，或者大致写一个.
+
+	public static void bucketSort(int[] arrays,int maxDight){
+		int times = 1;
+		int n =1;
+		int[][] bucket = new int[10][arrays.length];
+		int[] order = new int[10];
+		while(times<= maxDight){
+			for(int i= 0; i< arrays.length; i++){
+				int temp = (arrays[i]/n)%10;
+				bucket[temp][order[temp]] =arrays[i];
+				order[temp]++;
+			}
+			int k= 0;
+			for(int i= 0; i< 10; i++){
+				if(order[i]!=0)
+					for(int j= 0; j< order[i]; j++){
+						arrays[k]= bucket[i][j];
+						k++;
+					}
+				order[i]=0;
+			}
+			n*=10;
+			times++;
+		}
+	}
+
+
+
+
+
+
+
