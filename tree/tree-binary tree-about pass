@@ -1,0 +1,125 @@
+
+这篇讨论的是问题是关于在方法中new对象的问题
+关于值传递，引用传递
+
+//原来以为不算引用传递，甚至分析到可能与方法返回值有关，后面分析发现依旧是引用传递，只是陷入了一个误区
+//分析这种情况， 传入一个引用对象的变量到方法中，new一个对象给我们传入的引用，方法结束后，这个变量会发生变化吗
+    ...
+    TestClass tc = new TestClass("a");
+    change(ts);
+  //第10行
+   .........
+   }
+   public void change(TestClass tc){
+      tc = new TestClass("b");
+    }
+ }
+//此时在10行 tc应为 a 还是 b？
+//通过创建二叉树踩的这么一个大坑后，我已经不相信引用传递了，全是值传递，所谓引用传递，只是将对象地址的值传递进方法而已，别指望你能直接得到
+//外部那个变量的地址，不要想了
+
+//仔细思考后你将会明白基本数据类型与类的区别，int a=10;
+                                        ClassTest ct = new ClassTest(10);
+                                      这2个的区别可不小，我怀疑在某种情况下，a直接就变成一个地址了，表现为 0fff123ff=000....1010
+                                      而ct本身需要一块空间去存放对象的地址，将10看出一段数据，那么10就保存在 a这块空间
+                                      而将 newClass Test（10)看成一段数据，它将保存在堆空间上，具体的地址数值保存在ct这个声明变量上
+
+
+
+先看一段代码
+
+public class BinaryTree {
+	
+BinaryTree rightTree=null;
+BinaryTree leftTree=null;
+int value;
+	public static void main(String[] args){
+		int[] a={1,3,11,2,908,123};
+		BinaryTree root= new BinaryTree();
+    root.value=a[0]；
+		for(int i=1; i< a.length; i++)
+			insert(root,a[i]);
+		System.out.println(root.value);
+		
+	}
+  public static void insert(BinaryTree root,int value){
+    	if(null==root){
+			root = new BinaryTree();
+			root.value=value;
+		
+		}
+		else if(value<root.value)
+			insert(root.leftTree,value);
+		else 
+			insert(root.rightTree,value);
+}
+分析这段代码，运行发现没有生成想要的二叉树，发现root的2个子节点均为空
+为什么？  我们在insert方法中明明new了一个对象给它们，第22行，当节点为空，我们就new对象并给予这个节点
+
+思考下面一段代码
+
+//传入一个根节点，i=0；value随便写，这里用不到
+public static void insert(BinaryTree root,int value,int i){
+	if(i>2){
+		root=new BinaryTree();
+		root.value=100;
+		System.out.println(root.value);
+		return ;
+	}
+	i++;
+	insert(root,value,i);
+}
+最后遍历这个root节点，会发现没有任何变化，依旧是原来的值，这是为什么？
+个人分析 这个方法返回值为void，这就注定了这个方法中new的对象在方法执行完毕，全部都不可达，此时JVM可能还未回收，但地址全部都不可达了
+在看一个更清晰点的代码
+
+public static void insert(BinaryTree root){
+	
+		root=new BinaryTree();
+		root.value=100;
+		System.out.println(root.value);
+}
+调用这个方法后，理想的是root的value应该为100对吗
+事实是，root的value完全没有变化
+
+继续分析一段代码
+在调用这个方法之前，我们先System.out.println(root);
+public static void insert(BinaryTree root,int value,int i){
+		System.out.println(root);
+		root=new BinaryTree();
+		root.value=100;
+		System.out.println(root);
+		System.out.println(root.value);
+}
+在这段代码执行完毕之后，我们继续执行一次System.out.println(root);
+打印的结果：
+BinaryTree@15db9742
+BinaryTree@15db9742
+BinaryTree@6d06d69c
+100
+BinaryTree@15db9742
+是否如你的预期呢，调用insert之前，root的地址为BinaryTree@15db9742
+在方法中我们new了一个对象给root，root的地址为BinaryTree@6d06d69c
+在调用方法结束后，地址居然变回来了！！！！！
+
+结论：
+相信你已经发现了，这是指针，是一种引用传递
+
+相信有专业的术语描述这种情况，但本人不清楚，但结论很明显
+随便在方法外root跟方法内部root的地址是相同的，这是一句废话，关键在于，对象的地址其实没有变化过，但是root自身的地址变化了
+这就好像你在一块内存中放了一个地址，在另一块内存中放了同样的地址，这里的地址就是一段数据而已，我们通过这个数据，可以拿到相应地址内存中的数据
+说白了就是2个指针指向同一块空间，在方法中你将一个新的对象赋予这个变量，但外部的变量是无变化的，这是2个root变量，只不过指向的空间是相同的！！！！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
