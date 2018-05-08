@@ -94,7 +94,8 @@ int value;
 		System.out.print(root.value+"  ");
 		Traversal(root.rightTree);
 	}
-  //二叉树的搜索
+  //二叉树的搜索，这个搜索做的很简陋，如果没找找到返回false，找到的话返回true，一般情况可以查找的是一个键，返回的是一个值
+  //修改一下也很简单，操作就是这个操作，把返回类型及返回的东西改一下就好了
 	public static boolean search(BinaryTree root,int value){
     if(null==root)
 			return false;
@@ -106,6 +107,106 @@ int value;
 			return search(root.leftTree,value);
 	}
 }
+
+
+//删除操作，分析一下如何删除一个节点
+//必然需要找到所要删除的节点对吧，这个跟上一个方法查找是一样的，不同的是我们需要记录一下这个节点的父节点，因为我们子节点里没有通往父节点的路径
+//所以提前记录一下，当然你的二叉树节点是包含父节点信息，那么这步不是必要的
+//找到要删除的节点之后就是一个很简单的操作，即一个多路链表删除某个节点的操作，只不过多加点判断而已，JAVA中不需要free这个对象，JVM给我们搞定了
+
+//写代码时本来想直接复制search方法改改就好，发现用递归实现得多传入一个参数，或者多调用一个方法，很麻烦，我直接用循环写了
+
+
+//如果找到需要删除的节点，则存在4种情况，左右其中一个为空，都为空，都不为空，2的2次幂的情况
+//如果是左右均有子节点则稍稍复杂些
+//如果要删除的是根节点，我的定义的这个类就力不从心了，为什么？
+//答案是我这个类并没有存储根节点的信息，如果你存储了根节点的信息，那这一切就变得很简单，只需根据120行考虑的情况，令根节点改变指向就好
+//我不改了，我们假设是不会删除根节点的好吧，写到这你会发现写代码之前要考虑充分再动手，如果你定义了一个根节点的变量在类中，那么你调用方法时，
+//参数是不是少了一个（少传一个root），这是很爽的事情
+
+//单独把子节点都存在的情况列出来讲一讲，前面3种情况很简单，这种情况少复杂些，但理解了也很容易实现
+//有2个办法可以完成这种情况所需的操作   已知  s1是s2的父节点， s2是要删除的节点
+
+//第一种不太推荐的方法 ，这方法又墨迹，对树的平衡性的贡献也及其微小（平衡性在讲AVL树很详细说明），完全没理由用它，不过毕竟是一种方式，提一下吧
+//令s1指向s2的左子节点，s2从左边节点开始遍历左节点，每个左子节点依次上升一层，且使这个节点的右子节点指向父节点的右子节点
+//反之，令s1指向s2的右子节点，s2从右边节点开始遍历每个节点的右节点，每个右子节点依次上升一层，且使这个节点的左子节点指向付父节点的右子节点
+
+//第二种方法，很清晰，很简单，也好实现
+//找出s2节点左子节点为根构成的树中最大的一个节点，然后s1指向它，反正 就是找出右边最小的节点，s1指向它，这样不会破坏树
+//我们采用第二种方法找左边最大的
+
+public static boolean deleteNode(BinaryTree root, int value){
+	boolean found = false;
+	if(null==root)
+		return found;
+	BinaryTree child=root;
+	while(child!=null && !found ){     //这里的作用是找出要删除的节点child，并保留了其父节点root
+		if(child.value==value)
+			found=true;
+		else if(child.value> value){
+			root = child;
+			child = child.leftTree;
+		}
+		else {
+			root = child;
+			child = child.rightTree;
+		}		
+	}
+	if(null == child)
+		return found;
+	byte swh;//将情况分成4种 00   10  01   11
+	if(child.leftTree==null && child.rightTree==null)
+		swh=0;
+	else if(child.leftTree!=null && child.rightTree==null)
+		swh=1;
+	else if(child.leftTree==null && child.rightTree!=null)
+		swh=2;
+	else 
+		swh=3;
+	switch(swh){
+		case 0://左右节点均为空 00
+			if(root.leftTree==child)
+				root.leftTree=null;
+			else 
+				root.rightTree=null;
+			break;
+		case 1://10情况
+			if(root.leftTree==child)
+				root.leftTree=child.leftTree;
+			else 
+				root.rightTree=child.leftTree;
+			break;
+		case 2://01
+			if(root.leftTree==child)
+				root.leftTree=child.rightTree;
+			else 
+				root.rightTree=child.rightTree;
+			break;
+		case 3://11情况，左右子节点都不为空
+			BinaryTree index1=child;
+			BinaryTree index2=child.leftTree;
+			while(index2.rightTree!=null){          //找出要删除节点左边所有节点最大的一个
+				index1=index2;
+				index2=index2.rightTree;
+			}
+			if(index2!=child.leftTree)             //进行节点交换操作，操作完后，要删除的节点无法抵达，会自动被JVM回收
+				index2.leftTree=child.leftTree;
+			index2.rightTree=child.rightTree;
+			if(root.leftTree==child)
+				root.leftTree=index2;
+			else 
+				root.rightTree=index2;
+			index1.rightTree=null;                 //原来的路径封死，保持二叉树的结构
+			break;
+	}
+	return found;
+}
+
+
+
+
+
+
 
 
 
