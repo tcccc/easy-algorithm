@@ -27,6 +27,220 @@
 
 //其实要我说就理解一种了其他三种就很容易就解决了，lr与rl不过是操作两次ll，rr而已，而ll，rr又是对称的关系
 
+//代码很长慢慢看
+
+public class AVLTree {
+	
+	private Node rootNode;
+	
+	class Node{
+		int key;
+		int height;
+		Node left;
+		Node right;
+		Node(int key,Node left,Node right){
+		this.key=key;
+		this.height=0;
+		this.left=left;
+		this.right=right;
+		}
+	}
+	//获取高度，空的话，定义高度为0，这个树有多少层高度就是多少
+	private int height(Node node){
+		return node==null?0:node.height;
+	}
+	public int height(){
+		return height(rootNode);
+	}
+	//返回较大值
+	private int max(int a,int b){
+		return a>b?a:b;
+	}
+	//左左旋转
+	private Node leftLeftRotation(Node n2){
+		Node n1=n2.left;
+		n2.left=n1.right;
+		n1.right=n2;
+		
+		n2.height=max( height(n2.left),height(n2.right))+1;
+		n1.height=max( height(n1.left),n2.height)+1;
+		return n1;
+	}
+	//右右旋转
+	private Node rightRightRotation(Node n1){
+		Node n2=n1.right;
+		n1.right=n2.left;
+		n2.left=n1;
+		n1.height = max( height(n1.left), height(n1.right)) + 1;  //这里要更新一下高度，n1.left,n1.right内部
+		n2.height = max( height(n2.right), n1.height) + 1;		//都没改变所以高度没变化
+		return n2;
+	}
+	private Node leftRightRotation(Node n3){     //先进行n3.left的右右旋转，结束后，会发现情况变成了左左
+		n3.left=rightRightRotation(n3.left);
+		return leftLeftRotation(n3);
+	}
+	private Node rightLeftRotation(Node n1){
+		n1.right=leftLeftRotation(n1.right);
+		return rightRightRotation(n1);
+	}
+	
+	public void insert(int key){
+		rootNode=insert(rootNode,key);
+	}
+	public Node insert(Node node,int key){
+		if(node==null)
+			node=new Node(key,null,null);
+		else {
+			if(key<node.key){
+				node.left=insert(node.left,key);
+				if( height(node.left)-height(node.right) == 2 ){  //这里存在一个小细节，为什么不需要用绝对值呢？
+					if(key<node.left.key)                       //因为这个结果必然大于等于0，left>=right
+						node=leftLeftRotation(node);
+					else
+						node=leftRightRotation(node);
+				}
+			}
+			else if(key>node.key){
+				node.right=insert(node.right,key);
+				if( height(node.right)-height(node.left) == 2 ){
+					if(key>node.right.key)
+						node=rightRightRotation(node);
+					else 
+						node=rightLeftRotation(node);
+				}
+			}
+			else // key==node.key  ,不允许重复
+				System.out.println("key repeat!");
+		}
+		node.height=max( height(node.left),height(node.right))+1;
+		return node;
+	}
+	
+	//根据key查找代码
+	public Node search(int key){
+		return search(rootNode,key);
+	}
+	private Node search(Node node,int key){
+		if(node==null)
+			return node;
+		if(key<node.key)
+			return search(node.left,key);
+		else if(key>node.key)
+			return search(node.right,key);
+		else
+			return node;
+	}
+	private Node miniNode(Node node){
+		if(node==null)
+			return node;
+		while(node.left!=null){
+			node=node.left;
+		}
+		return node;
+			
+	}
+	public Node miniNode(){
+		Node node=miniNode(rootNode);
+		if(null!=node)
+			return node;
+		return null;
+	}
+	private Node maxNode(Node node){
+		if(node==null)
+			return node;
+		while(node.right!=null){
+			node=node.right;
+		}
+		return node;
+			
+	}
+	public Node maxNode(){
+		Node node=maxNode(rootNode);
+		if(null!=node)
+			return node;
+		return null;
+	}
+	
+	
+	//移除节点
+	public void remove(int key){
+		Node node=search(rootNode,key);
+		if(node!=null)
+			rootNode=remove(rootNode,key);
+	}
+	private Node remove(Node node,int key){
+		if(node==null)
+			return null;
+		if(key< node.key){                       //删除的节点在左边
+			node.left=remove(node.left,key);
+			if(height(node.right)-height(node.left) == 2){  //注意！删除的节点在左边，那我们需要调整的是右边
+				if( height(node.right.left)> height(node.right.right) )
+					node=rightLeftRotation(node);
+				else
+					node=rightRightRotation(node);
+			}
+		}
+		else if(key> node.key){
+			node.right=remove(node.right,key);
+			if( height(node.left)- height(node.right) == 2){
+				if(height(node.left.right)>height(node.left.left) )
+					node=leftRightRotation(node);
+				else
+					node=leftLeftRotation(node);
+			}
+		}
+		else{     //找到了key==node.key，我们要移除这个node
+			if(node.left!=null && node.right!=null){  //老生常谈的4种情况，看看他有没有子节点,00,10,01,11
+				if(height(node.left)> height(node.right)){
+					Node maxNode=maxNode(node.left);
+					node.key=maxNode.key;
+					node.left=remove(node.left,maxNode.key);
+				}
+				else {
+					Node minNode=miniNode(node.right);
+					node.key=minNode.key;
+					node.right=remove(node.right,minNode.key);
+				}
+			}else{
+				node=(node.left!=null)?node.left:node.right;
+			}
+		}
+		node.height=max(height(node.left),height(node.right));
+		return node;
+	}
+	public void inOrder(Node node){
+		if(null!=node){
+			inOrder(node.left);
+			System.out.print(node.key+"  ");
+			inOrder(node.right);
+		}
+	}
+	public void inOrder(){
+		inOrder(rootNode);
+	}
+	public static void main(String[] args){
+		int[] a={1,3,11,2,908,123,523,21,65634,123,75623,12316,534};
+		
+		AVLTree avlTree=new AVLTree();
+		for(int i=0; i< a.length; i++)
+			avlTree.insert(a[i]);
+		avlTree.inOrder();
+		System.out.println();
+		System.out.println(avlTree.search(1)==null);
+		avlTree.remove(1);
+		avlTree.inOrder();
+		System.out.println();
+		System.out.println(avlTree.search(1)==null);
+	}
+	
+}
+
+运行结果：
+key repeat!
+1  2  3  11  21  123  523  534  908  12316  65634  75623  
+false
+2  3  11  21  123  523  534  908  12316  65634  75623  
+true
 
 
 
