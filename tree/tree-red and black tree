@@ -48,6 +48,142 @@ rbtree的定义，符合以下几点的二叉树就是红黑树.
 
 
 
+public class RBTree {
+
+private static boolean RED = false;
+private static boolean BLACK = true;
+private Node root;
+	class Node{
+		int value;
+		Node rightNode;
+		Node leftNode;
+		Node parent;
+		boolean color;
+		Node(int value,boolean color,Node parent,Node left,Node right){
+			this.value=value;
+			this.color=color;
+			this.parent=parent;
+			this.leftNode=left;
+			this.rightNode=right;
+		}
+	}
+	//左旋转操作
+	private void leftRotate(Node x){
+		Node y=x.rightNode;
+		x.rightNode=y.leftNode;
+		if(y.leftNode!=null)
+			y.leftNode.parent=x;
+		
+		y.parent=x.parent;
+		if(x.parent == null)
+			root=y;
+		else {
+			if(x.parent.leftNode==x)
+				x.parent.leftNode=y;
+			else
+				x.parent.rightNode=y;
+		}
+		y.leftNode=x;
+		x.parent=y;
+	}
+	//右旋转操作
+	private void rightRotate(Node y){
+		Node x=y.leftNode;
+		y.leftNode=x.rightNode;
+		if(x.rightNode!=null)
+			x.rightNode.parent=y;
+		x.parent=y.parent;
+		if(y.parent==null)
+			root=x;
+		else {
+			if(y.parent.leftNode==y)
+				y.parent.leftNode=x;
+			else 
+				y.parent.rightNode=x;
+		}
+		x.rightNode=y;
+		y.parent=x;
+	}
+	//添加操作
+	private void insert(Node node){
+		Node y= null;
+		Node x=this.root;
+		while(x!=null){
+			y=x;
+			if(node.value>x.value)
+				x=x.rightNode;
+			else 
+				x=x.leftNode;
+		}
+		node.parent=y;
+		if(y!=null){
+			if(node.value>y.value)
+				y.rightNode=node;
+			else
+				y.leftNode=node;
+		}else
+			this.root=node;
+	node.color=RED;
+	insertFixup(node);
+	}
+	public void insert(int value){
+		Node node=new Node(value,BLACK,null,null,null);
+		insert(node);
+	}
+  //插入操作会破坏平衡性，我们需要矫正
+	private void insertFixup(Node node){
+		Node parent,gparent;
+		while( (parent=node.parent)!=null && parent.color==RED){
+			gparent =parent.parent;
+			if(parent==gparent.leftNode){
+				Node uncle=gparent.rightNode;
+				if(uncle!=null && uncle.color==RED ){
+					uncle.color=BLACK;
+					parent.color=BLACK;
+					gparent.color=RED;
+					node =gparent;
+					continue;
+				}
+				
+				if(parent.rightNode==node){
+					Node temp;
+					leftRotate(parent);
+					temp=parent;
+					parent=node;
+					node=temp;
+				}
+				parent.color=BLACK;
+				gparent.color=RED;
+				rightRotate(gparent);
+			}else{
+				Node uncle=gparent.leftNode;
+				if(uncle!=null && uncle.color==RED){
+					uncle.color=BLACK;
+					parent.color=BLACK;
+					gparent.color=RED;
+					node=gparent;
+				}
+				
+				if(parent.leftNode==node){
+					Node temp;
+					rightRotate(parent);
+					temp=parent;
+					parent=node;
+					node=temp;
+				}
+				parent.color=BLACK;
+				gparent.color=RED;
+				leftRotate(gparent);
+			}
+		}
+		root.color=BLACK;
+	}
+	
+	
+	
+	
+}
+
 
 
 
