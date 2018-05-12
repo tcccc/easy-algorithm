@@ -130,7 +130,6 @@ private Node root;
 		Node node=new Node(value,BLACK,null,null,null);
 		insert(node);
 	}
-  //插入操作会破坏平衡性，我们需要矫正
 	private void insertFixup(Node node){
 		Node parent,gparent;
 		while( (parent=node.parent)!=null && parent.color==RED){
@@ -178,9 +177,172 @@ private Node root;
 		}
 		root.color=BLACK;
 	}
+	private void remove(Node node){
+		Node child,parent;
+		boolean color;
+		if(node.leftNode!=null && node.rightNode!=null){
+			Node replace=node.rightNode;
+			while(replace.leftNode!=null)
+				replace=replace.leftNode;
+			if(node.parent!=null){
+				if(node.parent.leftNode==node)
+					node.parent.leftNode=replace;
+				else 
+					node.parent.rightNode=replace;
+			}else
+				root=replace;
+			
+			child=replace.rightNode;
+			parent=replace.parent;
+			color=replace.color;
+			
+			if(parent==node)
+				parent=replace;
+			else{
+				if(child!=null)
+					child.parent=parent;
+				parent.leftNode=child;
+				replace.rightNode=node.rightNode;
+				node.rightNode.parent=replace;
+			}
+			replace.parent=node.parent;
+			replace.color=node.color;
+			replace.leftNode=node.leftNode;
+			node.leftNode.parent=replace;
+			if(color ==BLACK)
+				removeFixup(child,parent);
+			node=null;
+			return ;
+		}
+		if(node.leftNode!=null)
+			child=node.leftNode;
+		else
+			child=node.rightNode;
+		
+		parent= node.parent;
+		color=node.color;
+		child.parent=parent;
+		if(node.parent!=null){
+			if(node.parent.leftNode==node)
+				node.parent.leftNode=child;
+			else 
+				node.parent.rightNode=child;
+		}else
+			root=child;
+		if(color=BLACK)
+			removeFixup(child,parent);
+		node=null;
+	}
+	public void remove(int value){
+		Node node;
+		if( (node=search(root,value) )!=null)
+			remove(node);
+	}
+	private Node search(Node x, int value) {
+         if (x==null)
+           return x;
+         if (value<x.value)
+             return search(x.leftNode, value);
+			else if (value>x.value)
+             return search(x.rightNode, value);
+			else
+            return x;
+
+	}
+	private void removeFixup(Node node, Node parent) {
+		Node other;
+		while( (node==null || node.color==BLACK) && (node!=root)){
+			if(parent.leftNode==node){
+				other=parent.rightNode;
+				if(other.color==RED){
+					other.color=BLACK;
+					parent.color=RED;
+					leftRotate(parent);
+					other=parent.rightNode;
+				}
+				if ((other.leftNode==null || other.leftNode.color==BLACK) &&
+		                (other.rightNode==null || other.rightNode.color==BLACK)) {
+		                // Case 2: x的兄弟w是黑色，且w的俩个孩子也都是黑色的  
+		                other.color=RED;
+		                node = parent;
+		                parent = node.parent;
+		            } else {
+		            	if(other.rightNode==null || other.rightNode.color==BLACK){
+		            		other.leftNode.color=BLACK;
+		            		other.color=RED;
+		            		rightRotate(other);
+		            		other=parent.rightNode;
+		            	}
+		            	other.color=parent.color;
+		            	parent.color=BLACK;
+		            	other.rightNode.color=BLACK;
+		            	leftRotate(parent);
+		            	node=root;
+		            	break;
+		            }
+			}else{
+				other = parent.leftNode;
+	            if (other.color==RED) {
+	                // Case 1: x的兄弟w是红色的  
+	                other.color=BLACK;
+	                parent.color=RED;
+	                rightRotate(parent);
+	                other = parent.leftNode;
+	            }
+
+	            if ((other.leftNode==null || other.leftNode.color==BLACK) &&
+	                (other.rightNode==null || other.rightNode.color==BLACK)) {
+	                // Case 2: x的兄弟w是黑色，且w的俩个孩子也都是黑色的  
+	                other.color=RED;
+	                node = parent;
+	                parent = node.parent;
+	            } else {
+
+	                if (other.leftNode==null || other.leftNode.color==BLACK) {
+	                    // Case 3: x的兄弟w是黑色的，并且w的左孩子是红色，右孩子为黑色。  
+	                    other.rightNode.color=BLACK;
+	                    other.color=RED;
+	                    leftRotate(other);
+	                    other = parent.leftNode;
+	                }
+
+	                // Case 4: x的兄弟w是黑色的；并且w的右孩子是红色的，左孩子任意颜色。
+	                other.color= parent.color;
+	                parent.color=BLACK;
+	                other.leftNode.color=BLACK;
+	                rightRotate(parent);
+	                node = this.root;
+	                break;
+	            }
+			}
+		}
+		if (node!=null)
+	        node.color=BLACK;
+	}
+	public void inOrder(Node node){
+		if(null!=node){
+			inOrder(node.leftNode);
+			System.out.print(node.value+" "+node.color+"    ");
+			inOrder(node.rightNode);
+		}
+	}
+	public void inOrder(){
+		inOrder(root);
+	}
+	public static void main(String[] args){
+		int[] a={1,3,11,2,908,123,523,21,65634,123,75623,12316,534};
+		
+		RBTree avlTree=new RBTree();
+		avlTree.inOrder();
+		for(int i=0; i< a.length; i++)
+			avlTree.insert(a[i]);
+		avlTree.inOrder();
+		avlTree.remove(1);
+		System.out.println();
+		avlTree.inOrder();
+		System.out.println();
 	
-	
-	
+	}
 	
 }
 
