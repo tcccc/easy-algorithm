@@ -1,0 +1,136 @@
+
+	//默认最大层数
+	private final int MAX_LEVEL;
+	//当前层数
+	private int listLevel;
+	//头尾
+	private SkipListNode<T> head;
+	private SkipListNode<T> tail;
+	//决定level的参数
+	private final double P;
+	//相关论文给出的最佳概率值
+	private static final double best_p = 0.25;
+	
+	public SkipList(){
+		//使用0.25,15
+		this(best_p,(int)Math.ceil(Math.log(Integer.MAX_VALUE) / Math.log(1 / best_p)) - 1);
+	}
+	
+	public SkipList(double probability,int maxLevel){
+		P=probability;
+		MAX_LEVEL=maxLevel;
+		listLevel=1;
+		head = new SkipListNode<T>(Integer.MIN_VALUE,null,maxLevel);
+		tail = new SkipListNode<T>(Integer.MAX_VALUE,null,maxLevel);
+		for(int i = 0; i < head.forward.length ; i++)
+			head.forward[i]=tail;
+	}
+	
+	 private int randomLevel() {
+	        int lvl = 1;
+	        while (lvl < MAX_LEVEL && Math.random() < P) {
+	            lvl++;
+	        }
+	        return lvl;
+	    }
+	
+//这是跳表节点的数据结构
+	class SkipListNode<T>{
+		T value;
+		int key;
+		SkipListNode[] forward;
+		public SkipListNode(int key,T value,int level){
+			this.value=value;
+			this.key=key;
+			this.forward=new SkipListNode[level];
+		}
+	}
+//
+	
+	public T search(int key){
+		SkipListNode<T> currentNode=head;
+		for(int i = listLevel-1; i >= 0; i--)
+			while(currentNode.forward[i].key<key)
+				currentNode=currentNode.forward[i];
+		if(currentNode.key == key)
+			return currentNode.value;
+		else 
+			return null;
+	}
+	
+	public void insert(int key,T value){
+		SkipListNode<T>[] update = new SkipListNode[MAX_LEVEL];
+		SkipListNode<T> currentNode=head;
+		for (int i = listLevel - 1; i >= 0; i--) {
+            while (currentNode.forward[i].key < key) {
+                currentNode = currentNode.forward[i];
+            }
+            update[i] = currentNode;//这个数据记录每一层如果它存在，则应该插入的位置
+        }
+		currentNode = currentNode.forward[0];
+		if(currentNode.key==key)
+			currentNode.value=value;
+		else {
+			int thisNodeLevel=randomLevel();
+			if(thisNodeLevel>listLevel){
+				for(int i=listLevel; i<thisNodeLevel;i++)
+					update[i]=head;
+				listLevel=thisNodeLevel;
+			}
+			SkipListNode<T> newNode = new SkipListNode<T>(key,value,thisNodeLevel);
+			for(int i = 0; i < thisNodeLevel; i++){
+				newNode.forward[i]=update[i].forward[i];
+				update[i].forward[i]=newNode;
+			}
+		}
+	}
+	public void delete(int key){
+		SkipListNode<T>[] update = new SkipListNode[MAX_LEVEL];
+		SkipListNode<T> currentNode=head;
+		for (int i = listLevel - 1; i >= 0; i--) {
+            while (currentNode.forward[i].key < key) {
+                currentNode = currentNode.forward[i];
+            }
+            update[i] = currentNode;//这个数据记录每一层如果它存在，则应该插入的位置
+        }
+		currentNode=currentNode.forward[0];
+		if(currentNode.key==key){
+			for(int i = 0; i < listLevel; i++){
+				if(update[i].forward[i].key!=currentNode.key)
+					break;
+				update[i].forward[i]=currentNode.forward[i];
+			}
+			
+			while(listLevel > 0 && head.forward[listLevel-1]==tail)
+				listLevel--;
+			
+		}
+	}
+    public void display() {
+        for (int i = listLevel - 1; i >= 0; i--) {
+            SkipListNode<T> currentNode = head.forward[i];
+            while (currentNode != tail) {
+                System.out.print(currentNode.key + "->");
+                currentNode = currentNode.forward[i];
+            }
+            System.out.println("tail");
+        }
+    }
+
+    public static void main(String[] args) {
+        SkipList<Integer> sl = new SkipList<Integer>();
+        sl.insert(33, 33);
+        sl.insert(55, 55);
+        sl.insert(101, 101);
+        sl.insert(1, 1);
+        sl.insert(100, 100);
+        sl.insert(8, 8);
+        sl.insert(62, 62);
+        sl.insert(39, 39);
+        sl.display();
+        System.out.println("---");
+       sl.delete(33);
+       sl.delete(39);
+        sl.display();
+    }
+	
